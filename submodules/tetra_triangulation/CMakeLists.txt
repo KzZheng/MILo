@@ -15,6 +15,12 @@ include_directories(${CONDA_PREFIX}/include)
 find_package(Torch REQUIRED)
 find_package(CGAL REQUIRED)
 # find_package(pybind11 REQUIRED)
+if (TORCH_CXX_FLAGS)
+    separate_arguments(TORCH_CXX_FLAGS_LIST NATIVE_COMMAND "${TORCH_CXX_FLAGS}")
+    add_compile_options(${TORCH_CXX_FLAGS_LIST})
+endif()
+string(REPLACE "-D_GLIBCXX_USE_CXX11_ABI=0" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+string(REPLACE "-D_GLIBCXX_USE_CXX11_ABI=0" "" CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS}")
 
 include(FetchContent)
 FetchContent_Declare(
@@ -62,6 +68,7 @@ pybind11_add_module(tetranerf_cpp_extension
 target_link_libraries(tetranerf_cpp_extension PRIVATE ${CUDA_LIBRARIES} ${TORCH_LIBRARIES})
 target_link_libraries(tetranerf_cpp_extension PRIVATE CGAL::CGAL)
 target_compile_features(tetranerf_cpp_extension PRIVATE cxx_std_17)
+target_compile_definitions(tetranerf_cpp_extension PRIVATE _GLIBCXX_USE_CXX11_ABI=1)
 set_target_properties(tetranerf_cpp_extension
     PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
